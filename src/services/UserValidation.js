@@ -84,6 +84,7 @@ module.exports = {
    */
 
   // Validate OTP action payload
+  // NOTE: OTP is strictly required and must be numeric, even for 'Resend' requests (legacy/strict requirement)
   verifyOTPValidation: (req, res, callback) => {
     const schema = Joi.object({
       type: Joi.string().valid("Confirm", "Resend").required(),

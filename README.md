@@ -21,6 +21,7 @@ LRF is an Express + MongoDB API service with user authentication, OTP verificati
 ### API Endpoints
 - `POST /api/v1/sign-up`
 - `POST /api/v1/verify-otp`
+  - **Note:** The `OTP` field is strictly required and must be a numeric string, even for `type: "Resend"` requests (though it may be ignored by the backend logic).
 - `POST /api/v1/login`
 - `POST /api/v1/forgot-password`
 - `POST /api/v1/reset-password`
