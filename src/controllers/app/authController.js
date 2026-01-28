@@ -155,12 +155,19 @@ module.exports = {
           const userName = email?.trim();
 
           let userLayer = await getUserDetailsFromRedis(userName);
-
           // If user not in Redis (e.g. forgot password flow), try fetching from DB
           if (!userLayer) {
             userLayer = await User.findOne(
               { email: userName },
               { name: 1, email: 1, emailVerify: 1 },
+            );
+          }
+
+          if (!userLayer) {
+            return Response.errorResponseWithoutData(
+              res,
+              res.locals.__("sessionExpired"),
+              Constants.BAD_REQUEST,
             );
           }
 
@@ -172,11 +179,11 @@ module.exports = {
             );
           }
 
-          if (!userLayer) {
+          if (!userLayer?.emailVerify && from === "forgotPassword") {
             return Response.errorResponseWithoutData(
               res,
-              res.locals.__("sessionExpired"),
-              Constants.BAD_REQUEST,
+              res.locals.__("emailNotVerified"),
+              Constants.FAIL,
             );
           }
 
