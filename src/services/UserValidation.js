@@ -142,13 +142,8 @@ module.exports = {
   // Validate change-password payload
   changePasswordValidation: (req, res, callback) => {
     const schema = Joi.object({
-      old_password: Joi.string().trim().required(),
+      oldPassword: Joi.string().trim().required(),
       password: Joi.string()
-        .trim()
-        .min(6)
-        .regex(/^(?=.*[0-9])(?=.*[a-zA-Z])[a-zA-Z0-9!@#$%^&*]{6,}$/)
-        .required(),
-      confirm_password: Joi.string()
         .trim()
         .min(6)
         .regex(/^(?=.*[0-9])(?=.*[a-zA-Z])[a-zA-Z0-9!@#$%^&*]{6,}$/)

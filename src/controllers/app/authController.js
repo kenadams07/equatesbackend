@@ -548,14 +548,14 @@ module.exports = {
       changePasswordValidation(requestParams, res, async (validate) => {
         if (validate) {
           // Ensure new password differs from old
-          if (requestParams.old_password !== requestParams.password) {
+          if (requestParams.oldPassword !== requestParams.password) {
             const userData = await User.findOne(
               { _id: authUserId, role: Constants?.ROLES?.USER },
               { password: 1 },
             );
             if (userData) {
               const passValid = await bcrypt.compare(
-                requestParams.old_password,
+                requestParams.oldPassword,
                 userData.password,
               );
               if (passValid) {
