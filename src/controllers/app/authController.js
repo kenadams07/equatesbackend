@@ -151,28 +151,41 @@ module.exports = {
         if (validate) {
           const { type, from, OTP, email } = reqParam;
           // Load user by email to resolve username for Redis keys
-          
+
           const userName = email?.trim();
+
+          let userLayer = await getUserDetailsFromRedis(userName);
+
+          // If user not in Redis (e.g. forgot password flow), try fetching from DB
+          if (!userLayer) {
+            userLayer = await User.findOne(
+              { email: userName },
+              { name: 1, email: 1, emailVerify: 1 },
+            );
+          }
+
+          if (userLayer?.emailVerify && from === "OTPVerification") {
+            return Response.errorResponseWithoutData(
+              res,
+              res.locals.__("alreadyEmailVerified."),
+              Constants.FAIL,
+            );
+          }
+
+          if (!userLayer) {
+            return Response.errorResponseWithoutData(
+              res,
+              res.locals.__("sessionExpired"),
+              Constants.BAD_REQUEST,
+            );
+          }
 
           // Resend flow: generate a new OTP and email it
           if (type === "Resend") {
             const newOtp = Helper.makeRandomOTPNumber(6);
             await saveOtpInRedis(userName, newOtp, 300);
-            let userLayer = await getUserDetailsFromRedis(userName);
-            
-            // If user not in Redis (e.g. forgot password flow), try fetching from DB
-            if (!userLayer && from === "forgotPassword") {
-               userLayer = await User.findOne({ email: userName });
-            }
 
             if (from === "OTPVerification") {
-              if (!userLayer) {
-                return Response.errorResponseWithoutData(
-                  res,
-                  res.locals.__("sessionExpired"),
-                  Constants.BAD_REQUEST,
-                );
-              }
               const mailSubject = "Your new verification code";
               const text = `Hi ${userLayer?.name || userName}, your new verification code is ${newOtp}. It expires in 5 minutes.`;
               await Mailer.sendSimpleMail(userLayer?.email, mailSubject, text);
@@ -502,13 +515,11 @@ module.exports = {
             );
           }
           // Verify OTP confirmation window
-          const resetFlag = await getResetPasswordFlag(
-            user?.email?.trim(),
-          );
+          const resetFlag = await getResetPasswordFlag(user?.email?.trim());
           if (!resetFlag) {
             return Response.errorResponseWithoutData(
               res,
-              res.locals.__("otpExpired"),
+              res.locals.__("otpNeedToVerifyThroughForgotPassword"),
               Constants.BAD_REQUEST,
             );
           }
@@ -616,7 +627,7 @@ module.exports = {
   },
 
   /**
-   * @description "This function is for Refresh Token."
+   * @description This function is for Refresh Token.
    * @param req
    * @param res
    */
@@ -689,7 +700,7 @@ module.exports = {
   },
 
   /**
-   * @description This function is for logout user."
+   * @description "This function is for logout user."
    * @param req
    * @param res
    */

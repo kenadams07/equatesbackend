@@ -1,7 +1,11 @@
 /* JWT helpers for issuing and verifying user tokens. */
 const jwt = require("jsonwebtoken");
 
-// Issue a signed JWT for authenticated users
+/**
+ * @description Issue a signed JWT for authenticated users
+ * @param payload
+ * @returns {string} token
+ */
 module.exports.issueUser = function (payload) {
   return jwt.sign(
     {
@@ -14,7 +18,11 @@ module.exports.issueUser = function (payload) {
   );
 };
 
-// Issue a signed Refresh Token for authenticated users
+/**
+ * @description Issue a signed Refresh Token for authenticated users
+ * @param payload
+ * @returns {string} refreshToken
+ */
 module.exports.issueUserRefreshToken = function (payload) {
   return jwt.sign(
     {
@@ -27,7 +35,11 @@ module.exports.issueUserRefreshToken = function (payload) {
   );
 };
 
-// Issue a signed JWT for demo users
+/**
+ * @description Issue a signed JWT for demo users
+ * @param payload
+ * @returns {string} token
+ */
 module.exports.issueDemoUser = function (payload) {
   return jwt.sign(
     {
@@ -39,7 +51,12 @@ module.exports.issueDemoUser = function (payload) {
   );
 };
 
-// Verify JWT signature and return decoded payload
+/**
+ * @description Verify JWT signature and return decoded payload
+ * @param token
+ * @param callback
+ * @returns {object|string} decoded payload or "error"
+ */
 module.exports.verify = function (token, callback) {
   try {
     return jwt.verify(token, process.env.JWT_USER_SECRETKEY, { algorithms: ['HS512'] }, callback);
@@ -48,7 +65,12 @@ module.exports.verify = function (token, callback) {
   }
 };
 
-// Verify Refresh Token signature and return decoded payload
+/**
+ * @description Verify Refresh Token signature and return decoded payload
+ * @param token
+ * @param callback
+ * @returns {object|string} decoded payload or "error"
+ */
 module.exports.verifyRefreshToken = function (token, callback) {
   try {
     return jwt.verify(token, process.env.JWT_USER_REFRESH_SECRETKEY || "DefaultRefreshSecret", { algorithms: ['HS512'] }, callback);
@@ -57,7 +79,11 @@ module.exports.verifyRefreshToken = function (token, callback) {
   }
 };
 
-// Extract raw JWT from Authorization header value
+/**
+ * @description Extract raw JWT from Authorization header value
+ * @param token
+ * @returns {string|boolean} token or false
+ */
 module.exports.decode = async (token) => {
   const parts = token.split(" ");
   if (parts.length === 2) {
