@@ -1,0 +1,36 @@
+include ../header
+    tr
+        td
+            table(width="100%" cellpadding="0" cellspacing="0" style="padding-top: 30px; padding-bottom: 10px;")
+                tbody
+                    tr
+                        td(style="text-align: left; padding: 0 20px;")
+                            p(style="font-size: 16px; margin-top: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
+                                | Hi #{username},
+                    tr
+                        td(style="text-align: left; padding: 0 20px;")
+                            p(style="font-size: 14px; margin-top: 10px; margin-bottom: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
+                                | Welcome, we have created an account for you.
+                            p(style="font-size: 14px; margin-top: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
+                                | Please find the login details below:
+                    tr
+                        td(style="text-align: left; padding: 0 20px;")
+                            p(style="font-size: 14px; margin-top: 10px; margin-bottom: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
+                                | Link:
+                                a(href=`${lab_admin_url}` style="color: #000000; text-decoration: none; font-weight: 700;") &nbsp; #{lab_admin_url}
+                            p(style="font-size: 14px; margin-top: 0; margin-bottom: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
+                                | Email:
+                                span(style="font-weight: 700;") &nbsp; #{email}
+                            p(style="font-size: 14px; margin-top: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
+                                | Password:
+                                span(style="font-weight: 700;") &nbsp; #{password}
+
+                    tr
+                        td(style="text-align: left; padding: 15px 20px;")
+                            p(style="font-size: 14px; margin-top: 10px; margin-bottom: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 600;")
+                                | Thanks you,
+                            p(style="font-size: 14px; margin-top: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
+                                | Team CMS Covid-ID
+    include ../footer
+
+

@@ -1,0 +1,22 @@
+/* Shared constants for API response codes and flags. */
+module.exports = {
+  SUCCESS: 200,
+  BET_ALREADY_MATCHED: 205,
+  BAD_REQUEST: 400,
+  PAGE_NOT_FOUND: 404,
+  UNAUTHORIZED: 401,
+  INTERNAL_SERVER: 500,
+  NOT_ACCEPTABLE: 406,
+  DATA_CONFLICT: 409,
+  CREATED: 201,
+  FAIL: 400,
+  ACTIVE: "1",
+  INACTIVE: "0",
+  DELETE: "2",
+  PER_PAGE: 10,
+  DEFAULT_PAGE: 1,
+  MIN_AGE: 18,
+  MARKET_ANALYSIS_CONSTANT_DAYS: 14,
+  VERIFIED: "1",
+  NOT_VERIFIED: "0",
+};

@@ -1,0 +1,23 @@
+/* v1 routes: user authentication and password management endpoints. */
+const router = require("express").Router();
+const { userTokenAuth } = require("../../middlewares/user");
+
+const {
+  signUp,
+  verifyOTP,
+  login,
+  forgotPassword,
+  resetPassword,
+  changePassword,
+  logout,
+} = require("../../controllers/app/authController");
+
+router.post("/verify-otp", verifyOTP);
+router.post("/sign-up", signUp);
+router.post("/login", login);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
+router.post("/change-password", userTokenAuth, changePassword);
+router.post("/logout", logout);
+
+module.exports = router;
