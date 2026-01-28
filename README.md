@@ -26,6 +26,7 @@ LRF is an Express + MongoDB API service with user authentication, OTP verificati
 - `POST /api/v1/reset-password`
 - `POST /api/v1/change-password`
 - `POST /api/v1/logout`
+- `POST /api/v1/refresh-token`
 
 ### Postman Collection
 - https://dark-eclipse-192797.postman.co/workspace/My-Workspace~fe23da78-90ce-435b-83b5-d0f222ec5d2d/environment/11740435-40e3b9e4-826a-4561-a30c-f3e8525f9712?action=share&creator=11740435&active-environment=11740435-40e3b9e4-826a-4561-a30c-f3e8525f9712
@@ -36,6 +37,7 @@ LRF is an Express + MongoDB API service with user authentication, OTP verificati
 - `NODE_ENV`
 - `REDIS_URL`, `REDIS_HOST`, `REDIS_PORT`
 - `JWT_USER_SECRETKEY`, `USER_TOKEN_EXPIRES_IN`
+- `JWT_USER_REFRESH_SECRETKEY`, `USER_REFRESH_TOKEN_EXPIRES_IN`
 - `SEND_EMAIL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `COMPANY_EMAIL`
 - `API_URL`
 - `S3_ENABLE`, `AMZ_BUCKET`, `AMZ_BUCKET_URL`
@@ -125,7 +127,7 @@ tests/
 
 ### src/models/user.js
 - User schema
-  - Defines user properties and indexes
+  - Defines user properties (including refreshToken) and indexes
   - Uses timestamps for created and updated dates
 
 ### src/models/index.js
@@ -144,7 +146,7 @@ tests/
 - `verifyOTP`
   - Validates request
   - Finds user by email
-  - Handles OTP resend paths
+  - Handles OTP resend paths (with DB fallback if Redis data missing)
   - Validates OTP from Redis
   - For signup, loads user data from Redis and creates DB user
   - For forgot password, sets reset flag in Redis
@@ -180,6 +182,12 @@ tests/
   - Validates request
   - Clears user token fields
   - Returns success
+- `refreshToken`
+  - Validates request
+  - Verifies refresh token
+  - Rotates refresh token (issues new one)
+  - Issues new access token
+  - Returns new tokens
 
 ### src/services/Constants.js
 - Constants map
@@ -234,6 +242,8 @@ tests/
   - Validates change password fields and policy
 - `logoutValidation`
   - Validates logout payload user_id
+- `refreshTokenValidation`
+  - Validates refresh token payload
 
 ### src/services/User_jwtToken.js
 - `issueUser`
@@ -244,6 +254,10 @@ tests/
   - Verifies a JWT and returns decoded payload or "error"
 - `decode`
   - Extracts bearer token string from Authorization header
+- `issueUserRefreshToken`
+  - Signs a refresh token with user id
+- `verifyRefreshToken`
+  - Verifies a refresh token and returns decoded payload or "error"
 
 ### src/services/redisService.js
 - `saveUserDetailsInRedis`
@@ -287,17 +301,13 @@ tests/
 - `DemoLogin`
   - Maps fields for demo login responses
 
-### src/transformers/admin/adminAuthTransformer.js
-- `adminAuthTransformer`
-  - Maps admin auth response fields
-
 ### src/transformers/admin/adminLoginTransformer.js
 - `LoginTransformer`
   - Maps detailed admin login payload
 - `Login`
   - Maps basic admin login payload
 
-### src/seeders/adminSeeder.js
+### src/seeders/userSeeder.js
 - `createAdmin`
   - Loads configuration and SSL CA
   - Connects to MongoDB

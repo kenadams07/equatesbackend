@@ -151,14 +151,20 @@ module.exports = {
         if (validate) {
           const { type, from, OTP, email } = reqParam;
           // Load user by email to resolve username for Redis keys
-
+          
           const userName = email?.trim();
 
           // Resend flow: generate a new OTP and email it
           if (type === "Resend") {
             const newOtp = Helper.makeRandomOTPNumber(6);
             await saveOtpInRedis(userName, newOtp, 300);
-            const userLayer = await getUserDetailsFromRedis(userName);
+            let userLayer = await getUserDetailsFromRedis(userName);
+            
+            // If user not in Redis (e.g. forgot password flow), try fetching from DB
+            if (!userLayer && from === "forgotPassword") {
+               userLayer = await User.findOne({ email: userName });
+            }
+
             if (from === "OTPVerification") {
               if (!userLayer) {
                 return Response.errorResponseWithoutData(

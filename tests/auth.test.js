@@ -212,8 +212,8 @@ describe("Auth API", () => {
 
   test("verify-otp confirms otp and creates user", async () => {
     seedUser({ username: "janedoe", email: "jane@example.com" });
-    redisService.saveOtpInRedis("janedoe", "123456", 300);
-    redisService.saveUserDetailsInRedis("janedoe", 3600, {
+    redisService.saveOtpInRedis("jane@example.com", "123456", 300);
+    redisService.saveUserDetailsInRedis("jane@example.com", 3600, {
       name: "Jane Doe",
       username: "janedoe",
       email: "jane@example.com",
@@ -228,6 +228,9 @@ describe("Auth API", () => {
       OTP: "123456",
       email: "jane@example.com",
     });
+    if (response.body.meta.code !== 200) {
+      console.log("verify-otp failed response:", JSON.stringify(response.body, null, 2));
+    }
     expect(response.body.meta.code).toBe(200);
     expect(response.body.data.username).toBe("janedoe");
   });
@@ -288,7 +291,7 @@ describe("Auth API", () => {
       password: bcrypt.hashSync("OldPassword1", 10),
     });
     mockAuthUserId = user._id;
-    redisService.saveResetPasswordFlag("janedoe", 300);
+    redisService.saveResetPasswordFlag("jane@example.com", 300);
     const response = await request(app).post("/api/v1/reset-password").send({
       email: "jane@example.com",
       password: "NewPassword1",
@@ -305,9 +308,8 @@ describe("Auth API", () => {
     });
     mockAuthUserId = user._id;
     const response = await request(app).post("/api/v1/change-password").send({
-      old_password: "OldPassword1",
+      oldPassword: "OldPassword1",
       password: "NewPassword1",
-      confirm_password: "NewPassword1",
     });
     expect(response.body.meta.code).toBe(200);
   });
