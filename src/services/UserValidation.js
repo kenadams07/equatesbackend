@@ -90,11 +90,7 @@ module.exports = {
       from: Joi.string().valid("forgotPassword", "OTPVerification").required(),
       OTP: Joi.string()
         .pattern(/^[0-9]+$/)
-        .when("type", {
-          is: "Resend",
-          then: Joi.valid(null).allow(null),
-          otherwise: Joi.required(),
-        }),
+        .required(),
       email: Joi.string().trim().email().required(),
     }).required();
     const { error } = schema.validate(req);

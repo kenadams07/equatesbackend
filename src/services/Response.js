@@ -71,7 +71,7 @@ module.exports = {
 
     // Validation error response (legacy pattern)
     validationErrorResponseData(res, message, code = 400) {
-        console.log(`🚀 Validation error response:`, message, res);
+        // console.log(`🚀 Validation error response:`, message);
         const response = {
             code,
             message
