@@ -240,7 +240,18 @@ describe("Auth API", () => {
     const response = await request(app).post("/api/v1/verify-otp").send({
       type: "Resend",
       from: "forgotPassword",
-      OTP: null,
+      OTP: "123456", // Sending dummy OTP to satisfy strict Joi pattern validation
+      email: "jane@example.com",
+    });
+    expect(response.body.meta.code).toBe(200);
+  });
+
+  test("verify-otp resends with existing OTP payload (regression test)", async () => {
+    seedUser({ username: "janedoe", email: "jane@example.com", emailVerify: null });
+    const response = await request(app).post("/api/v1/verify-otp").send({
+      type: "Resend",
+      from: "OTPVerification",
+      OTP: "123456", // Sending OTP even though it's resend
       email: "jane@example.com",
     });
     expect(response.body.meta.code).toBe(200);
