@@ -317,9 +317,43 @@ describe("Auth API", () => {
       username: "janedoe",
       email: "jane@example.com",
     });
+    mockAuthUserId = user._id;
     const response = await request(app).post("/api/v1/logout").send({
-      user_id: user._id,
+      userId: user._id,
     });
     expect(response.body.meta.code).toBe(200);
+  });
+
+  test("refresh-token returns new tokens", async () => {
+    const user = seedUser({
+      username: "janedoe",
+      email: "jane@example.com",
+      refreshToken: "valid_refresh_token",
+    });
+
+    // Mock verifyRefreshToken to return valid user id
+    const { verifyRefreshToken } = require("../src/services/User_jwtToken");
+    // Since User_jwtToken is not mocked in this file, we might need to rely on the actual implementation
+    // or spy on it if we want to force return. 
+    // However, issueUserRefreshToken uses jsonwebtoken.sign.
+    // If we want to test successful refresh, we need a valid token signed with the secret.
+    // Let's generate a real valid refresh token using the service helper.
+    
+    const { issueUserRefreshToken } = require("../src/services/User_jwtToken");
+    const validRefreshToken = issueUserRefreshToken({ id: user._id });
+    
+    // Update user with this valid token so it matches in DB
+    user.refreshToken = validRefreshToken;
+    
+    const response = await request(app).post("/api/v1/refresh-token").send({
+      refreshToken: validRefreshToken,
+    });
+    
+    expect(response.body.meta.code).toBe(200);
+    expect(response.body.meta.token).toBeDefined();
+    expect(response.body.meta.refreshToken).toBeDefined();
+    
+    // In fast tests, iat might be same, so token might be same.
+    // Just verify we got a token back.
   });
 });

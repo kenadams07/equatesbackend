@@ -10,6 +10,7 @@ const {
   resetPassword,
   changePassword,
   logout,
+  refreshToken,
 } = require("../../controllers/app/authController");
 
 router.post("/verify-otp", verifyOTP);
@@ -18,6 +19,7 @@ router.post("/login", login);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 router.post("/change-password", userTokenAuth, changePassword);
-router.post("/logout", logout);
+router.post("/refresh-token", refreshToken);
+router.post("/logout", userTokenAuth, logout);
 
 module.exports = router;

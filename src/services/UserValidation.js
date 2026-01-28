@@ -165,6 +165,26 @@ module.exports = {
   },
 
   /**
+   * @description This function is used to validate refresh token fields.
+   * @param req
+   * @param res
+   */
+  // Validate refresh token payload
+  refreshTokenValidation: (req, res, callback) => {
+    const schema = Joi.object({
+      refreshToken: Joi.string().trim().required(),
+    });
+    const { error } = schema.validate(req);
+    if (error) {
+      return Response.validationErrorResponseData(
+        res,
+        res.__(Helper.validationMessageKey("refreshTokenValidation", error)),
+      );
+    }
+    return callback(true);
+  },
+
+  /**
    * @description This function is used to validate logout field ID.
    * @param req
    * @param res
@@ -172,7 +192,7 @@ module.exports = {
   // Validate logout payload
   logoutValidation: (req, res, callback) => {
     const schema = Joi.object({
-      user_id: Joi.string().trim().required(),
+      userId: Joi.string().trim().required(),
     });
     const { error } = schema.validate(req);
     if (error) {

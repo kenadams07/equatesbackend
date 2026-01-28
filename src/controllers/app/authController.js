@@ -13,10 +13,15 @@ const {
   resetPassValidation,
   verifyOTPValidation,
   changePasswordValidation,
+  refreshTokenValidation,
 } = require("../../services/UserValidation");
 const { Login } = require("../../transformers/user/userAuthTransformer");
 const { User } = require("../../models");
-const { issueUser } = require("../../services/User_jwtToken");
+const {
+  issueUser,
+  issueUserRefreshToken,
+  verifyRefreshToken,
+} = require("../../services/User_jwtToken");
 const {
   saveUserDetailsInRedis,
   saveOtpInRedis,
@@ -96,8 +101,8 @@ module.exports = {
           }
           // Create OTP and store in Redis with short TTL
           const generateotp = Helper.makeRandomOTPNumber(6);
-          await saveUserDetailsInRedis(layer.username, 3600, layer);
-          await saveOtpInRedis(layer.username, generateotp, 300);
+          await saveUserDetailsInRedis(layer.email, 3600, layer);
+          await saveOtpInRedis(layer.email, generateotp, 300);
           // Send OTP email
           const mailSubject = "Verify your email";
           const text = `Hi ${requestParams.name}, your verification code is ${generateotp}. It expires in 5 minutes.`;
@@ -114,7 +119,7 @@ module.exports = {
               res.__("UserCreatedOTPConfirmationRequired"),
             );
           } else {
-            await deleteOtpFromRedis(layer.username);
+            await deleteOtpFromRedis(layer.email);
             return Response.errorResponseWithoutData(
               res,
               res.__("CouldntRegisterAtTheMoment"),
@@ -132,7 +137,7 @@ module.exports = {
       );
     }
   },
-  
+
   /**
    * @description "This function is for OTP Verification."
    * @param req
@@ -146,27 +151,15 @@ module.exports = {
         if (validate) {
           const { type, from, OTP, email } = reqParam;
           // Load user by email to resolve username for Redis keys
-          let user = await User.findOne(
-            { email: email?.toLowerCase() },
-            { email: 1, username: 1 },
-          )?.lean();
 
-          if (!user) {
-            return Response.errorResponseWithoutData(
-              res,
-              res.locals.__("UserNotExists"),
-              Constants.FAIL,
-            );
-          }
-          const userName = user?.username?.toLowerCase();
+          const userName = email?.trim();
 
           // Resend flow: generate a new OTP and email it
           if (type === "Resend") {
             const newOtp = Helper.makeRandomOTPNumber(6);
             await saveOtpInRedis(userName, newOtp, 300);
-
+            const userLayer = await getUserDetailsFromRedis(userName);
             if (from === "OTPVerification") {
-              const userLayer = await getUserDetailsFromRedis(userName);
               if (!userLayer) {
                 return Response.errorResponseWithoutData(
                   res,
@@ -178,14 +171,14 @@ module.exports = {
               const text = `Hi ${userLayer?.name || userName}, your new verification code is ${newOtp}. It expires in 5 minutes.`;
               await Mailer.sendSimpleMail(userLayer?.email, mailSubject, text);
             } else if (from === "forgotPassword") {
-              if (user?.email) {
+              if (userLayer?.email) {
                 const locals = {
-                  username: user.username,
+                  username: userLayer.username,
                   otp: newOtp,
                   appName: Helper.AppName,
                 };
                 const mail = await Mailer.sendMail(
-                  user.email,
+                  userLayer.email,
                   "Password reset OTP",
                   "forgotPassword",
                   locals,
@@ -320,12 +313,14 @@ module.exports = {
                 }
                 // Issue JWT and persist login metadata
                 const token = issueUser({ id: user._id });
+                const refreshToken = issueUserRefreshToken({ id: user._id });
                 await User.updateOne(
                   { _id: user?._id },
                   {
                     $set: {
                       last_login: new Date(),
                       token,
+                      refreshToken,
                       "ip_address.system_ip": system_ip,
                       "ip_address.browser_ip": browser_ip,
                     },
@@ -337,7 +332,7 @@ module.exports = {
                   new Transformer.Single(user, Login).parse(),
                   Constants.SUCCESS,
                   res.locals.__("loginSuccessfull"),
-                  { token },
+                  { token, refreshToken },
                 );
               } else {
                 return Response.errorResponseWithoutData(
@@ -363,7 +358,7 @@ module.exports = {
         }
       });
     } catch (error) {
-      console.log("error",error);
+      console.log("error", error);
       return Response.errorResponseData(
         res,
         res.__("internalError"),
@@ -406,7 +401,7 @@ module.exports = {
           if (user) {
             if (user?.status === Constants.ACTIVE) {
               // Store OTP and email it to the user
-              await saveOtpInRedis(user.username, otp, 300);
+              await saveOtpInRedis(user.email, otp, 300);
               const locals = {
                 username: user.username,
                 otp,
@@ -502,7 +497,7 @@ module.exports = {
           }
           // Verify OTP confirmation window
           const resetFlag = await getResetPasswordFlag(
-            user?.username?.toLowerCase(),
+            user?.email?.trim(),
           );
           if (!resetFlag) {
             return Response.errorResponseWithoutData(
@@ -520,7 +515,7 @@ module.exports = {
             },
             { new: true },
           );
-          await deleteResetPasswordFlag(user?.username?.toLowerCase());
+          await deleteResetPasswordFlag(user?.email?.trim());
           let token = updatedUser?.token;
           return Response.successResponseData(
             res,
@@ -615,23 +610,96 @@ module.exports = {
   },
 
   /**
-   * @description "This function is to logout user."
+   * @description "This function is for Refresh Token."
+   * @param req
+   * @param res
+   */
+  refreshToken: async (req, res) => {
+    try {
+      const requestParams = req.body;
+      refreshTokenValidation(requestParams, res, async (validate) => {
+        if (validate) {
+          const { refreshToken } = requestParams;
+          const decoded = verifyRefreshToken(refreshToken);
+          if (decoded === "error" || !decoded.id) {
+            return Response.errorResponseWithoutData(
+              res,
+              res.locals.__("invalidRefreshToken"),
+              Constants.UNAUTHORIZED,
+            );
+          }
+
+          const user = await User.findOne({
+            _id: decoded.id,
+            refreshToken: refreshToken,
+          });
+          if (!user) {
+            return Response.errorResponseWithoutData(
+              res,
+              res.locals.__("invalidRefreshToken"),
+              Constants.UNAUTHORIZED,
+            );
+          }
+
+          if (user.status !== Constants.ACTIVE) {
+            return Response.errorResponseWithoutData(
+              res,
+              res.locals.__("accountBlocked"),
+              Constants.UNAUTHORIZED,
+            );
+          }
+
+          // Issue new tokens
+          const newToken = issueUser({ id: user._id });
+          const newRefreshToken = issueUserRefreshToken({ id: user._id });
+
+          // Update user with new refresh token
+          await User.updateOne(
+            { _id: user._id },
+            {
+              $set: {
+                token: newToken,
+                refreshToken: newRefreshToken,
+              },
+            },
+          );
+
+          return Response.successResponseData(
+            res,
+            {},
+            Constants.SUCCESS,
+            res.locals.__("tokenRefreshed"),
+            { token: newToken, refreshToken: newRefreshToken },
+          );
+        }
+      });
+    } catch (error) {
+      return Response.errorResponseData(
+        res,
+        res.locals.__("internalError"),
+        Constants.INTERNAL_SERVER,
+      );
+    }
+  },
+
+  /**
+   * @description This function is for logout user."
    * @param req
    * @param res
    */
   logout: async (req, res) => {
     try {
       const requestParams = req.body;
+      const { authUserId } = req;
       // Validate payload and clear user token
       logoutValidation(requestParams, res, async (validate) => {
         if (validate) {
           await User.updateOne(
-            { _id: requestParams.user_id },
+            { _id: authUserId },
             {
               $set: {
                 token: null,
-                tokenExpiresAt: null,
-                "twoFactorToken.exp": "",
+                refreshToken: null,
               },
             },
           );

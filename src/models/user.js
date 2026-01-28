@@ -58,6 +58,9 @@ const userSchema = new mongoose.Schema(
     token: {
       type: String,
     },
+    refreshToken: {
+      type: String,
+    },
     status: {
       type: String,
       default: "0",
