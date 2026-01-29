@@ -718,8 +718,9 @@ module.exports = {
       // Validate payload and clear user token
       logoutValidation(requestParams, res, async (validate) => {
         if (validate) {
+          let userId = authUserId ?? requestParams.userId;
           await User.updateOne(
-            { _id: authUserId },
+            { _id: userId },
             {
               $set: {
                 token: null,
