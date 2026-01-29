@@ -175,7 +175,7 @@ describe("Auth API", () => {
       name: "Jane Doe",
       username: "janedoe",
       email: "jane@example.com",
-      mobileNo: "+12345678901",
+      mobileNo: "1234567890",
       password: "Password1",
       companyName: "Acme",
       groupName: "Group",
@@ -184,18 +184,70 @@ describe("Auth API", () => {
     expect(response.body.data.username).toBe("janedoe");
   });
 
+  test("sign-up fails with invalid mobile number length (11 digits)", async () => {
+    const response = await request(app).post("/api/v1/sign-up").send({
+      name: "Jane Doe",
+      username: "janedoe_invalid_mobile_11",
+      email: "jane_invalid_11@example.com",
+      mobileNo: "12345678901",
+      password: "Password1",
+      companyName: "Acme",
+      groupName: "Group",
+    });
+    // Validation errors return { code, message } directly
+    expect(response.body.code).toBe(400);
+  });
+
+  test("sign-up fails with invalid mobile number type (number 11 digits)", async () => {
+    const response = await request(app).post("/api/v1/sign-up").send({
+      name: "Jane Doe",
+      username: "janedoe_invalid_mobile_num",
+      email: "jane_invalid_num@example.com",
+      mobileNo: 12345678901,
+      password: "Password1",
+      companyName: "Acme",
+      groupName: "Group",
+    });
+    // Should fail either because it's not a string or because length is wrong (if coerced)
+    expect(response.body.code).toBe(400);
+  });
   test("sign-up blocks existing username", async () => {
     seedUser({ username: "janedoe", email: "jane@example.com" });
     const response = await request(app).post("/api/v1/sign-up").send({
       name: "Jane Doe",
       username: "janedoe",
       email: "jane2@example.com",
-      mobileNo: "+12345678901",
+      mobileNo: "1234567890",
       password: "Password1",
       companyName: "Acme",
       groupName: "Group",
     });
     expect(response.body.meta.code).toBe(400);
+  });
+
+  test("sign-up fails with invalid mobile number length", async () => {
+    const response = await request(app).post("/api/v1/sign-up").send({
+      name: "Jane Doe",
+      username: "janedoe_invalid_mobile",
+      email: "jane_invalid@example.com",
+      mobileNo: "123456789", // 9 digits
+      password: "Password1",
+      companyName: "Acme",
+      groupName: "Group",
+    });
+    // Validation errors return { code, message } directly, not wrapped in meta
+    expect(response.body.code).toBe(400);
+
+    const response2 = await request(app).post("/api/v1/sign-up").send({
+      name: "Jane Doe",
+      username: "janedoe_invalid_mobile2",
+      email: "jane_invalid2@example.com",
+      mobileNo: "12345678901", // 11 digits
+      password: "Password1",
+      companyName: "Acme",
+      groupName: "Group",
+    });
+    expect(response2.body.code).toBe(400);
   });
 
   test("verify-otp rejects invalid otp", async () => {

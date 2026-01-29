@@ -17,7 +17,8 @@ module.exports = {
       email: Joi.string().trim().email().required(),
       mobileNo: Joi.string()
         .trim()
-        .pattern(/^\+?[0-9]{10,15}$/)
+        .length(10)
+        .pattern(/^[0-9]+$/)
         .required(),
       password: Joi.string()
         .trim()
