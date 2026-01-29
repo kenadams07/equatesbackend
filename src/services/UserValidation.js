@@ -15,6 +15,7 @@ module.exports = {
       name: Joi.string().trim().min(2).max(100).required(),
       username: Joi.string().trim().min(3).max(100).required(),
       email: Joi.string().trim().email().required(),
+      countryCode: Joi.string().trim().max(6).required(),
       mobileNo: Joi.string()
         .trim()
         .length(10)
@@ -100,6 +101,27 @@ module.exports = {
       return Response.validationErrorResponseData(
         res,
         res.__(Helper.validationMessageKey("verifyOTPValidation", error)),
+      );
+    }
+    return callback(true);
+  },
+
+  /**
+   * @description This function is used to validate check availability fields.
+   * @param req
+   * @param res
+   */
+  checkAvailabilityValidation: (req, res, callback) => {
+    const schema = Joi.object({
+      username: Joi.string().trim().min(3).max(100),
+      email: Joi.string().trim().email(),
+      mobileNo: Joi.string().trim().length(10).pattern(/^[0-9]+$/),
+    }).or("username", "email", "mobileNo");
+    const { error } = schema.validate(req);
+    if (error) {
+      return Response.validationErrorResponseData(
+        res,
+        res.__(Helper.validationMessageKey("checkAvailabilityValidation", error)),
       );
     }
     return callback(true);
