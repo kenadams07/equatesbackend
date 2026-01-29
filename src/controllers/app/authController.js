@@ -14,6 +14,7 @@ const {
   verifyOTPValidation,
   changePasswordValidation,
   refreshTokenValidation,
+  checkAvailabilityValidation,
 } = require("../../services/UserValidation");
 const { Login } = require("../../transformers/user/userAuthTransformer");
 const { User } = require("../../models");
@@ -95,6 +96,7 @@ module.exports = {
             groupName: requestParams.groupName,
             password: hashedPass,
             status: Constants.ACTIVE,
+            countryCode: requestParams.countryCode,
           };
           if (requestParams?.mobileNo) {
             layer.mobileNo = mobileNoNumber;
@@ -314,6 +316,7 @@ module.exports = {
               email: 1,
               emailVerify: 1,
               mobileNo: 1,
+              countryCode: 1,
               createdAt: 1,
               updatedAt: 1,
             },
@@ -494,7 +497,13 @@ module.exports = {
           // Ensure user exists and is verified
           let user = await User.findOne(
             { email: reqParam?.email?.toLowerCase() },
-            { email: 1, username: 1, password: 1, emailVerify: 1 },
+            {
+              email: 1,
+              username: 1,
+              password: 1,
+              emailVerify: 1,
+              countryCode: 1,
+            },
           )?.lean();
           if (!user) {
             return Response.errorResponseWithoutData(
@@ -701,6 +710,85 @@ module.exports = {
       return Response.errorResponseData(
         res,
         res.locals.__("internalError"),
+        Constants.INTERNAL_SERVER,
+      );
+    }
+  },
+
+  /**
+   * @description "This function is for Check Availability."
+   * @param req
+   * @param res
+   */
+  checkAvailability: async (req, res) => {
+    try {
+      const requestParams = req.body;
+      checkAvailabilityValidation(requestParams, res, async (validate) => {
+        if (validate) {
+          const conditions = [];
+          // Normalize inputs for comparison
+          const username = requestParams.username
+            ? requestParams.username.toLowerCase()
+            : null;
+          const email = requestParams.email
+            ? requestParams.email.toLowerCase()
+            : null;
+          let mobileNo = null;
+
+          if (username) conditions.push({ username });
+          if (email) conditions.push({ email });
+          if (requestParams.mobileNo) {
+            // Ensure mobileNo is treated as a number for DB query and comparison
+            const parsedMobile = Number(requestParams.mobileNo);
+            if (!Number.isNaN(parsedMobile)) {
+              mobileNo = parsedMobile;
+              conditions.push({ mobileNo });
+            }
+          }
+
+          // If no valid conditions, return success with no conflicts (though validation usually prevents this)
+          if (conditions.length === 0) {
+            return Response.successResponseData(
+              res,
+              { username: false, email: false, mobileNo: false },
+              Constants.SUCCESS,
+              res.locals.__("checkAvailabilitySuccess"),
+            );
+          }
+
+          // Optimization: Use .lean() for performance and projection to fetch only needed fields
+          const users = await User.find(
+            { $or: conditions },
+            { username: 1, email: 1, mobileNo: 1 },
+          ).lean();
+
+          const conflicts = {
+            username: false,
+            email: false,
+            mobileNo: false,
+          };
+
+          // Check which fields matched
+          for (const user of users) {
+            if (username && user.username === username)
+              conflicts.username = true;
+            if (email && user.email === email) conflicts.email = true;
+            if (mobileNo && user.mobileNo === mobileNo)
+              conflicts.mobileNo = true;
+          }
+
+          return Response.successResponseData(
+            res,
+            conflicts,
+            Constants.SUCCESS,
+            res.locals.__("checkAvailabilitySuccess"),
+          );
+        }
+      });
+    } catch (error) {
+      return Response.errorResponseData(
+        res,
+        res.__("internalError"),
         Constants.INTERNAL_SERVER,
       );
     }

@@ -101,8 +101,18 @@ jest.mock("../src/models", () => {
     }
     return null;
   };
+  const findUsers = (query) => {
+    if (!query) return [];
+    if (query.$or) {
+      return Array.from(users.values()).filter((user) =>
+        query.$or.some((cond) => matchesCond(user, cond)),
+      );
+    }
+    return Array.from(users.values()).filter((user) => matchesCond(user, query));
+  };
   const User = {
     findOne: jest.fn((query) => createQuery(findUser(query))),
+    find: jest.fn((query) => createQuery(findUsers(query))),
     create: jest.fn(async (data) => {
       const user = { _id: `user_${users.size + 1}`, ...data };
       users.set(user._id, user);
@@ -176,6 +186,7 @@ describe("Auth API", () => {
       username: "janedoe",
       email: "jane@example.com",
       mobileNo: "1234567890",
+      countryCode: "+1",
       password: "Password1",
       companyName: "Acme",
       groupName: "Group",
@@ -184,12 +195,26 @@ describe("Auth API", () => {
     expect(response.body.data.username).toBe("janedoe");
   });
 
+  test("sign-up fails without country code", async () => {
+    const response = await request(app).post("/api/v1/sign-up").send({
+      name: "Jane Doe",
+      username: "janedoe_no_country",
+      email: "jane_no_country@example.com",
+      mobileNo: "1234567890",
+      password: "Password1",
+      companyName: "Acme",
+      groupName: "Group",
+    });
+    expect(response.body.code).toBe(400);
+  });
+
   test("sign-up fails with invalid mobile number length (11 digits)", async () => {
     const response = await request(app).post("/api/v1/sign-up").send({
       name: "Jane Doe",
       username: "janedoe_invalid_mobile_11",
       email: "jane_invalid_11@example.com",
       mobileNo: "12345678901",
+      countryCode: "+1",
       password: "Password1",
       companyName: "Acme",
       groupName: "Group",
@@ -218,6 +243,7 @@ describe("Auth API", () => {
       username: "janedoe",
       email: "jane2@example.com",
       mobileNo: "1234567890",
+      countryCode: "+1",
       password: "Password1",
       companyName: "Acme",
       groupName: "Group",
@@ -231,6 +257,7 @@ describe("Auth API", () => {
       username: "janedoe_invalid_mobile",
       email: "jane_invalid@example.com",
       mobileNo: "123456789", // 9 digits
+      countryCode: "+1",
       password: "Password1",
       companyName: "Acme",
       groupName: "Group",
@@ -243,6 +270,7 @@ describe("Auth API", () => {
       username: "janedoe_invalid_mobile2",
       email: "jane_invalid2@example.com",
       mobileNo: "12345678901", // 11 digits
+      countryCode: "+1",
       password: "Password1",
       companyName: "Acme",
       groupName: "Group",
@@ -420,5 +448,39 @@ describe("Auth API", () => {
     
     // In fast tests, iat might be same, so token might be same.
     // Just verify we got a token back.
+  });
+
+  test("check-availability returns conflicts for existing user", async () => {
+    seedUser({
+      username: "janedoe",
+      email: "jane@example.com",
+      mobileNo: 1234567890,
+    });
+    const response = await request(app).post("/api/v1/check-availability").send({
+      username: "janedoe",
+      email: "jane@example.com",
+      mobileNo: "1234567890",
+    });
+    expect(response.body.meta.code).toBe(200);
+    expect(response.body.data.username).toBe(true);
+    expect(response.body.data.email).toBe(true);
+    expect(response.body.data.mobileNo).toBe(true);
+  });
+
+  test("check-availability returns no conflicts for new user", async () => {
+    seedUser({
+      username: "janedoe",
+      email: "jane@example.com",
+      mobileNo: 1234567890,
+    });
+    const response = await request(app).post("/api/v1/check-availability").send({
+      username: "newuser",
+      email: "new@example.com",
+      mobileNo: "9876543210",
+    });
+    expect(response.body.meta.code).toBe(200);
+    expect(response.body.data.username).toBe(false);
+    expect(response.body.data.email).toBe(false);
+    expect(response.body.data.mobileNo).toBe(false);
   });
 });

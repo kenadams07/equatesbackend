@@ -20,6 +20,7 @@ LRF is an Express + MongoDB API service with user authentication, OTP verificati
 
 ### API Endpoints
 - `POST /api/v1/sign-up`
+  - **Note:** The `mobileNo` field is strictly required to be exactly 10 digits.
 - `POST /api/v1/verify-otp`
   - **Note:** The `OTP` field is strictly required and must be a numeric string, even for `type: "Resend"` requests (though it may be ignored by the backend logic).
 - `POST /api/v1/login`
@@ -42,6 +43,7 @@ LRF is an Express + MongoDB API service with user authentication, OTP verificati
 - `SEND_EMAIL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `COMPANY_EMAIL`
 - `API_URL`
 - `S3_ENABLE`, `AMZ_BUCKET`, `AMZ_BUCKET_URL`
+- `PEM_FILE_PATH` (Optional: Path to MongoDB SSL CA certificate)
 
 ### How to Run
 - Install dependencies: `npm install`
@@ -317,3 +319,48 @@ tests/
 ## Tests
 - Jest tests live in [tests/auth.test.js](file:///c:/LRF/tests/auth.test.js)
 - Run `npm test`
+
+## Validation Details
+
+### Sign Up (`signUpValidation`)
+- **name**: Required, string, trimmed, min 2 chars, max 100 chars.
+- **username**: Required, string, trimmed, min 3 chars, max 100 chars.
+- **email**: Required, string, trimmed, valid email format.
+- **countryCode**: Required, string, trimmed, max 6 chars.
+- **mobileNo**: Required, string, trimmed, exact length 10, numeric pattern (`^[0-9]+$`).
+- **password**: Required, string, trimmed, min 8 chars, must contain at least one digit and one letter (`/^(?=.*[0-9])(?=.*[a-zA-Z])[a-zA-Z0-9!@#$%^&*_]{8,}$/`).
+- **companyName**: Required, string, trimmed, min 2 chars, max 100 chars.
+- **groupName**: Required, string, trimmed, min 2 chars, max 100 chars.
+
+### Login (`loginValidation`)
+- **username**: Required, string, trimmed.
+- **password**: Required, string, trimmed.
+
+### Forgot Password (`forgotPasswordValidation`)
+- **email**: Required, string, trimmed, valid email format.
+
+### OTP Verification (`verifyOTPValidation`)
+- **type**: Required, one of "Confirm" or "Resend".
+- **from**: Required, one of "forgotPassword" or "OTPVerification".
+- **OTP**: Required, string, numeric pattern (`^[0-9]+$`).
+- **email**: Required, string, trimmed, valid email format.
+
+### Check Availability (`checkAvailabilityValidation`)
+- At least one of the following fields is required:
+    - **username**: String, trimmed, min 3 chars, max 100 chars.
+    - **email**: String, trimmed, valid email format.
+    - **mobileNo**: String, trimmed, exact length 10, numeric pattern (`^[0-9]+$`).
+
+### Reset Password (`resetPassValidation`)
+- **email**: Required, string, trimmed, valid email format.
+- **password**: Required, string, trimmed, min 8 chars, must contain at least one digit and one letter (`/^(?=.*[0-9])(?=.*[a-zA-Z])[a-zA-Z0-9!@#$%^&*_]{8,}$/`).
+
+### Change Password (`changePasswordValidation`)
+- **oldPassword**: Required, string, trimmed.
+- **password**: Required, string, trimmed, min 6 chars, must contain at least one digit and one letter (`/^(?=.*[0-9])(?=.*[a-zA-Z])[a-zA-Z0-9!@#$%^&*]{6,}$/`).
+
+### Refresh Token (`refreshTokenValidation`)
+- **refreshToken**: Required, string, trimmed.
+
+### Logout (`logoutValidation`)
+- **userId**: Required, string, trimmed.
