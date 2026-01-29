@@ -15,6 +15,8 @@
 	"signUpValidationCompanynameEmpty": "Company name is required.",
 	"signUpValidationGroupnameEmpty": "Group name is required.",
 	"signUpValidationMobilenoEmpty": "Mobile number is required.",
+	"signUpValidationCountrycodeEmpty": "Country code is required.",
+	"signUpValidationCountrycodeRequired": "Country code is required.",
 	"usernameAlreadyExistTryLogin": "Username already exists. Please try logging in.",
 	"userNameNotExist": "Username does not exist. Please try with correct username.",
 	"emailAlreadyExistTryLogin": "Email already exists. Please try logging in.",
@@ -70,5 +72,6 @@
 	"signUpValidationMobilenoPattern": "Mobile number must contain only digits.",
 	"signUpValidationMobilenoLength": "Mobile number must be exactly 10 digits.",
 	"signUpValidationMobilenoBase": "Please enter your mobile number.",
-	"signUpValidationMobilenoMax": "Mobile number cannot be longer than 10 digits."
+	"signUpValidationMobilenoMax": "Mobile number cannot be longer than 10 digits.",
+	"checkAvailabilitySuccess": "Availability checked successfully."
 }

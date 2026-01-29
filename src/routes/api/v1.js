@@ -11,10 +11,12 @@ const {
   changePassword,
   logout,
   refreshToken,
+  checkAvailability,
 } = require("../../controllers/app/authController");
 
 router.post("/verify-otp", verifyOTP);
 router.post("/sign-up", signUp);
+router.post("/check-availability", checkAvailability);
 router.post("/login", login);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);

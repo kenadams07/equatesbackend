@@ -6,6 +6,7 @@ module.exports = {
     email: "email",
     mobileNo: "mobileNo",
     emailVerify: "emailVerify",
+    countryCode: "countryCode",
     createdAt: "createdAt",
     updatedAt: "updated_at",
     // type: false, // for demo user identification

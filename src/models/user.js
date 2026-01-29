@@ -19,6 +19,8 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       maxLength: 100,
+      unique: true,
+      index: true,
     },
     companyName: {
       type: String,
@@ -33,9 +35,15 @@ const userSchema = new mongoose.Schema(
       required: true,
       maxLength: 100,
     },
+    countryCode: {
+      type: String,
+      maxLength: 10,
+    },
     mobileNo: {
       type: Number,
       maxLength: 15,
+      unique: true,
+      index: true,
     },
     emailVerify: {
       type: "date",
@@ -67,12 +75,12 @@ const userSchema = new mongoose.Schema(
       enum: ["0", "1", "2"], //0-inactive, 1- active, 2- deleted
     },
   },
-  { timestamps: { createDate: "createdAt", updatedDate: "updated_at" } }
+  { timestamps: { createDate: "createdAt", updatedDate: "updated_at" } },
 );
 // User
 
 const User = mongoose.model("User", userSchema);
 
 module.exports = {
-  User
+  User,
 };
