@@ -66,5 +66,9 @@
 	"otpNeedToVerifyThroughForgotPassword": "OTP need to verify through forgot password.",
 	"alreadyEmailVerified": "Email already verified.",
 	"alreadyEmailVerified.": "Email already verified.",
-	"verifyOTPValidationOtpBase": "verifyOTPValidationOtpBase"
+	"verifyOTPValidationOtpBase": "verifyOTPValidationOtpBase",
+	"signUpValidationMobilenoPattern": "Mobile number must contain only digits.",
+	"signUpValidationMobilenoLength": "Mobile number must be exactly 10 digits.",
+	"signUpValidationMobilenoBase": "Please enter your mobile number.",
+	"signUpValidationMobilenoMax": "Mobile number cannot be longer than 10 digits."
 }
