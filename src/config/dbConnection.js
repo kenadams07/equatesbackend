@@ -18,10 +18,10 @@ const connect = () => {
   const mongooseOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    // tls: true,
-    // sslValidate: false,
-    // // Please Uncomment when pushing the code to github if you are using a self-signed certificate or need a specific CA file
-    // sslCA: pemFilePath.toString(), // Provide the CA certificate file for SSL connections
+    tls: true,
+    sslValidate: false,
+    // Please Uncomment when pushing the code to github if you are using a self-signed certificate or need a specific CA file
+    sslCA: pemFilePath.toString(), // Provide the CA certificate file for SSL connections
   };
 
   mongoose.connect(url, mongooseOptions);
