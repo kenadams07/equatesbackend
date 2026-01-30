@@ -1,6 +1,6 @@
 /* Utility helpers shared across validation and auth flows. */
 module.exports = {
-  AppName: "xyz",
+  AppName: "Equates",
 
   /**
    * @description This function use for converting string to uppercase.

@@ -1,0 +1,54 @@
+doctype html
+html
+  head
+    meta(name='viewport', content='width=device-width')
+    meta(http-equiv='Content-Type', content='text/html; charset=UTF-8')
+    title #{appName}
+    style.
+      @media only screen and (max-width: 620px) {
+        table.body h1 { font-size: 28px !important; margin-bottom: 10px !important; }
+        table.body p, table.body ul, table.body ol, table.body td, table.body span, table.body a { font-size: 16px !important; }
+        table.body .wrapper { padding: 20px !important; }
+        table.body .content { padding: 0 !important; }
+        table.body .container { padding: 0 !important; width: 100% !important; }
+        table.body .main { border-left-width: 0 !important; border-radius: 0 !important; border-right-width: 0 !important; }
+        table.body .btn table { width: 100% !important; }
+        table.body .btn a { width: 100% !important; }
+        table.body .img-responsive { height: auto !important; max-width: 100% !important; width: auto !important; }
+      }
+  body(style="background-color: #f6f6f6; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.6; margin: 0; padding: 0; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%;")
+    table.body(border='0', cellpadding='0', cellspacing='0', style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background-color: #f6f6f6;")
+      tr
+        td(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; vertical-align: top;")
+        td.container(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; vertical-align: top; display: block; margin: 0 auto !important; max-width: 580px; padding: 10px; width: 580px;")
+          .content(style="box-sizing: border-box; display: block; margin: 0 auto; max-width: 580px; padding: 10px;")
+            
+            // START CENTERED WHITE CONTAINER
+            table.main(style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); overflow: hidden;")
+              
+              // Header Row (Red Background)
+              tr
+                td.header(style="background-color: #fb0000; padding: 20px 30px; text-align: center;")
+                  h2(style="color: #ffffff; margin: 0; letter-spacing: 2px; text-transform: uppercase; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 700; font-size: 24px;") #{appName}
+              
+              tr
+                td.wrapper(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; vertical-align: top; box-sizing: border-box; padding: 40px 30px;")
+                  table(border='0', cellpadding='0', cellspacing='0', style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;")
+                    tr
+                      td(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; vertical-align: top;")
+                        
+                        // Content Block
+                        block content
+
+            // START FOOTER
+            .footer(style="clear: both; margin-top: 20px; text-align: center; width: 100%;")
+              table(border='0', cellpadding='0', cellspacing='0', style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;")
+                tr
+                  td.content-block(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; vertical-align: top; padding-bottom: 10px; padding-top: 10px; color: #9a9a9a; font-size: 12px; text-align: center;")
+                    p(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; font-weight: normal; margin: 0; margin-bottom: 8px; color: #9a9a9a; text-align: center;") Copyright © #{new Date().getFullYear()} #{appName}. All rights reserved.
+                    p(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; font-weight: normal; margin: 0; color: #9a9a9a; text-align: center;")
+                      | Need help? 
+                      a(href="mailto:" + process.env.COMPANY_EMAIL, style="color: #9a9a9a; text-decoration: underline; font-size: 12px;") Contact Support
+            // END FOOTER
+            
+        td(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; vertical-align: top;")

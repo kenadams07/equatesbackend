@@ -73,5 +73,6 @@
 	"signUpValidationMobilenoLength": "Mobile number must be exactly 10 digits.",
 	"signUpValidationMobilenoBase": "Please enter your mobile number.",
 	"signUpValidationMobilenoMax": "Mobile number cannot be longer than 10 digits.",
-	"checkAvailabilitySuccess": "Availability checked successfully."
+	"checkAvailabilitySuccess": "Availability checked successfully.",
+	"passwordResetSucessfully": "Password reset successfully. Please log in with your new password."
 }
