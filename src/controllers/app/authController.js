@@ -339,6 +339,7 @@ module.exports = {
               $or: conditions,
             },
             {
+              _id: 1,
               name: 1,
               username: 1,
               password: 1,
