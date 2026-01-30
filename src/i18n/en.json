@@ -29,7 +29,7 @@
 	"sessionExpired": "Session expired.",
 	"UserNotExists": "User does not exist.",
 	"otpResent": "OTP resent.",
-	"otpVerified": "OTP has been verified.",
+	"otpVerified": "OTP has been verified.Now you can reset your password.",
 	"emailNotVerified": "Email not verified.",
 	"loginSuccessfull": "Login successful.",
 	"forgotPasswordEmailSendSuccess": "Password reset email sent successfully.",
