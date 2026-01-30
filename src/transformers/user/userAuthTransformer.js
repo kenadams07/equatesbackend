@@ -1,6 +1,7 @@
 /* Response field mappers for user auth responses. */
 module.exports = {
   Login: {
+    id: "_id",
     username: "username",
     name: "name",
     email: "email",
