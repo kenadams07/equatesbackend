@@ -1,34 +1,23 @@
-include ../header
+extends ../layout
+
+block content
+  h3(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 600; margin: 0; margin-bottom: 20px; color: #333333;") Welcome to #{appName}!
+  
+  p(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; font-weight: normal; margin: 0; margin-bottom: 15px; color: #555555; line-height: 1.6;") Hi #{username},
+  p(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 15px; font-weight: normal; margin: 0; margin-bottom: 25px; color: #555555; line-height: 1.6;") Your account has been created successfully. Here are your login credentials:
+  
+  table(border='0', cellpadding='0', cellspacing='0', style="background-color: #f8f9fa; border: 1px solid #e1e4e8; border-radius: 6px; margin: 25px 0; width: 100%;")
     tr
-        td
-            table(width="100%" cellpadding="0" cellspacing="0" style="padding-top: 30px; padding-bottom: 10px;")
-                tbody
-                    tr
-                        td(style="text-align: left; padding: 0 20px;")
-                            p(style="font-size: 16px; margin-top: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
-                                | Hi ,
-                    tr
-                        td(style="text-align: left; padding: 0 20px;")
-                            p(style="font-size: 14px; margin-top: 10px; margin-bottom: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
-                                | Welcome, we have created an account for you.
-                            p(style="font-size: 14px; margin-top: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
-                                | Please find the login details below:
-                    tr
-                        td(style="text-align: left; padding: 0 20px;")
-                    
-                            p(style="font-size: 14px; margin-top: 0; margin-bottom: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
-                                | Email:
-                                span(style="font-weight: 700;") &nbsp; #{email}
-                            p(style="font-size: 14px; margin-top: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
-                                | Password:
-                                span(style="font-weight: 700;") &nbsp; #{password}
+      td(style="padding: 20px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px;")
+        div(style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;")
+          span(style="font-weight: 600; color: #777; margin-right: 15px; display: inline-block; width: 80px;") Username:
+          span(style="font-weight: 600; color: #333; font-size: 16px;") #{loginUsername}
+        div
+          span(style="font-weight: 600; color: #777; margin-right: 15px; display: inline-block; width: 80px;") Password:
+          span(style="font-weight: 600; color: #333; font-size: 16px;") #{loginPassword}
 
-                    tr
-                        td(style="text-align: left; padding: 15px 20px;")
-                            p(style="font-size: 14px; margin-top: 10px; margin-bottom: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 600;")
-                                | Thanks you,
-                            p(style="font-size: 14px; margin-top: 0; color: #000000; font-family: 'Open Sans', sans-serif; font-weight: 400;")
-                                | Team Betxfair
-    include ../footer
-
-
+  p(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 15px; color: #777777; line-height: 1.6;") Please keep these credentials safe and change your password after your first login.
+  
+  div(style="border-top: 1px solid #eeeeee; margin-top: 30px; padding-top: 20px;")
+    p(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: normal; margin: 0; margin-bottom: 5px; color: #555555;") Thanks,
+    p(style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; margin: 0; color: #333333;") Team #{appName}

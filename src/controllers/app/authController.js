@@ -107,11 +107,16 @@ module.exports = {
           await saveOtpInRedis(layer.email, generateotp, 300);
           // Send OTP email
           const mailSubject = "Verify your email";
-          const text = `Hi ${requestParams.name}, your verification code is ${generateotp}. It expires in 5 minutes.`;
-          const mail = await Mailer.sendSimpleMail(
+          const locals = {
+            username: requestParams.name,
+            otp: generateotp,
+            appName: Helper.AppName,
+          };
+          const mail = await Mailer.sendMail(
             requestParams.email,
             mailSubject,
-            text,
+            "otpVerification",
+            locals,
           );
           if (mail) {
             return Response.successResponseData(
@@ -158,10 +163,10 @@ module.exports = {
 
           let userLayer = await getUserDetailsFromRedis(userName);
           // If user not in Redis (e.g. forgot password flow), try fetching from DB
-          if (!userLayer) {
+          if (userLayer) {
             userLayer = await User.findOne(
               { email: userName },
-              { name: 1, email: 1, emailVerify: 1 },
+              { name: 1, email: 1, username: 1, emailVerify: 1 },
             );
           }
 
@@ -196,8 +201,17 @@ module.exports = {
 
             if (from === "OTPVerification") {
               const mailSubject = "Your new verification code";
-              const text = `Hi ${userLayer?.name || userName}, your new verification code is ${newOtp}. It expires in 5 minutes.`;
-              await Mailer.sendSimpleMail(userLayer?.email, mailSubject, text);
+              const locals = {
+                username: userLayer?.name || userName,
+                otp: newOtp,
+                appName: Helper.AppName,
+              };
+              await Mailer.sendMail(
+                userLayer?.email,
+                mailSubject,
+                "resendOtpVerification",
+                locals,
+              );
             } else if (from === "forgotPassword") {
               if (userLayer?.email) {
                 const locals = {
@@ -207,8 +221,8 @@ module.exports = {
                 };
                 const mail = await Mailer.sendMail(
                   userLayer.email,
-                  "Password reset OTP",
-                  "forgotPassword",
+                  "New Reset Password Code",
+                  "resendForgotPassword",
                   locals,
                 );
                 if (mail) {
@@ -572,13 +586,10 @@ module.exports = {
             { new: true },
           );
           await deleteResetPasswordFlag(user?.email?.trim());
-          let token = updatedUser?.token;
-          return Response.successResponseData(
+          return Response.successResponseWithoutData(
             res,
-            new Transformer.Single(updatedUser, Login).parse(),
+            res.locals.__("passwordResetSucessfully"),
             Constants.SUCCESS,
-            res.locals.__("loginSuccessfull"),
-            { token },
           );
         }
       });
