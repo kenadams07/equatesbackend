@@ -160,38 +160,30 @@ module.exports = {
           // Load user by email to resolve username for Redis keys
 
           const userName = email?.trim();
-
           let userLayer = await getUserDetailsFromRedis(userName);
+
           // If user not in Redis (e.g. forgot password flow), try fetching from DB
           if (userLayer) {
-            userLayer = await User.findOne(
+            const user = await User.findOne(
               { email: userName },
               { name: 1, email: 1, username: 1, emailVerify: 1 },
             );
-          }
 
-          if (!userLayer) {
-            return Response.errorResponseWithoutData(
-              res,
-              res.locals.__("sessionExpired"),
-              Constants.BAD_REQUEST,
-            );
-          }
+            if (user?.emailVerify && from === "OTPVerification") {
+              return Response.errorResponseWithoutData(
+                res,
+                res.locals.__("alreadyEmailVerified."),
+                Constants.FAIL,
+              );
+            }
 
-          if (userLayer?.emailVerify && from === "OTPVerification") {
-            return Response.errorResponseWithoutData(
-              res,
-              res.locals.__("alreadyEmailVerified."),
-              Constants.FAIL,
-            );
-          }
-
-          if (!userLayer?.emailVerify && from === "forgotPassword") {
-            return Response.errorResponseWithoutData(
-              res,
-              res.locals.__("emailNotVerified"),
-              Constants.FAIL,
-            );
+            if (!user?.emailVerify && from === "forgotPassword") {
+              return Response.errorResponseWithoutData(
+                res,
+                res.locals.__("emailNotVerified"),
+                Constants.FAIL,
+              );
+            }
           }
 
           // Resend flow: generate a new OTP and email it
@@ -259,6 +251,7 @@ module.exports = {
           // Signup confirmation: persist cached user data
           if (from === "OTPVerification") {
             const layer = await getUserDetailsFromRedis(userName);
+
             if (!layer) {
               return Response.errorResponseWithoutData(
                 res,
