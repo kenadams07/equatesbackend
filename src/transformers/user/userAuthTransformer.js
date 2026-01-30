@@ -7,6 +7,8 @@ module.exports = {
     mobileNo: "mobileNo",
     emailVerify: "emailVerify",
     countryCode: "countryCode",
+    groupName: "groupName",
+    companyName: "companyName",
     createdAt: "createdAt",
     updatedAt: "updated_at",
     // type: false, // for demo user identification

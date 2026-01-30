@@ -347,6 +347,8 @@ module.exports = {
               emailVerify: 1,
               mobileNo: 1,
               countryCode: 1,
+              companyName: 1,
+              groupName: 1,
               createdAt: 1,
               updatedAt: 1,
             },
