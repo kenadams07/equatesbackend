@@ -92,6 +92,14 @@ src/
   services/
   transformers/
   views/
+    emails/
+      forgotPassword/
+      loginCredential/
+      newPassword/
+      otpVerification/
+      resendForgotPassword/
+      resendOtpVerification/
+      layout.pug
 tests/
 ```
 
@@ -174,7 +182,7 @@ tests/
 - `verifyOTP`
   - Validates request
   - Finds user by email
-  - Handles OTP resend paths (with DB fallback if Redis data missing)
+  - Handles OTP resend paths (uses specific 'Resend' email templates for better UX, with DB fallback if Redis data missing)
   - Validates OTP from Redis
   - For signup:
     - Loads user data from Redis and creates DB user
