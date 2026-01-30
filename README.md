@@ -21,6 +21,31 @@ LRF is an Express + MongoDB API service with user authentication, OTP verificati
 ### API Endpoints
 - `POST /api/v1/sign-up`
   - **Note:** The `mobileNo` field is strictly required to be exactly 10 digits.
+
+### Response Format
+The API uses two different response structures:
+
+**Success Response**
+```json
+{
+  "data": { ... },
+  "meta": {
+    "code": 200,
+    "message": "Success message"
+  }
+}
+```
+
+**Error / Validation Response**
+Note: These responses return HTTP 200 OK, but contain an error code in the body.
+```json
+{
+  "code": 400,
+  "message": "Error description"
+}
+```
+
+### API Endpoints
 - `POST /api/v1/verify-otp`
   - **Note:** The `OTP` field is strictly required and must be a numeric string, even for `type: "Resend"` requests (though it may be ignored by the backend logic).
 - `POST /api/v1/login`
@@ -151,7 +176,11 @@ tests/
   - Finds user by email
   - Handles OTP resend paths (with DB fallback if Redis data missing)
   - Validates OTP from Redis
-  - For signup, loads user data from Redis and creates DB user
+  - For signup:
+    - Loads user data from Redis and creates DB user
+    - **Issues JWT and refresh token (Auto-login)**
+    - **Updates user login metadata (last_login, tokens, IP addresses)**
+    - Returns created user payload with tokens
   - For forgot password, sets reset flag in Redis
   - Returns success or failure
 - `login`

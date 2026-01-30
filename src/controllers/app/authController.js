@@ -252,14 +252,37 @@ module.exports = {
                 Constants.BAD_REQUEST,
               );
             }
+
             layer.emailVerify = new Date();
             const createdUser = await User.create(layer);
+            // Issue JWT and persist login metadata
+            const token = issueUser({ id: createdUser._id });
+            const refreshToken = issueUserRefreshToken({ id: createdUser._id });
+
+            // Track system and browser IPs for login audit
+            const browser_ip =
+              req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+            const system_ip = req.clientIp;
+            await User.updateOne(
+              { _id: createdUser?._id },
+              {
+                $set: {
+                  last_login: new Date(),
+                  token,
+                  refreshToken,
+                  "ip_address.system_ip": system_ip,
+                  "ip_address.browser_ip": browser_ip,
+                },
+              },
+            );
+
             await deleteOtpFromRedis(userName);
             return Response.successResponseData(
               res,
               new Transformer.Single(createdUser, Login).parse(),
               Constants.SUCCESS,
               res.locals.__("emailVerified"),
+              { token, refreshToken },
             );
           }
 
